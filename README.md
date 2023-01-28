@@ -1,52 +1,58 @@
-# ModernX
-An MPV OSC script based on [mpv-osc-modern](https://github.com/maoiscat/mpv-osc-modern/) that aims to mirror the functionality of MPV's stock OSC while with a more modern-looking interface.
+# Awesome-OSC
+一个基于 [ModernX](https://github.com/cyl0/ModernX) 和 [mpv-osc-modern](https://github.com/maoiscat/mpv-osc-modern/) 的 mpv 播放器的屏幕控制器。
+相较于 mpv-osc-modern/ModernX 主要做了以下几点修改：
+* 采用 FontAwesome 图标
+* 增加部分按钮及相应功能
+* 支持底部控制按钮的自定义摆放，通过 osc.conf 配置
 
-![img](https://github.com/cyl0/ModernX/blob/main/preview.png)
+![preview1](https://github.com/Qiyue0726/awesome-osc/blob/main/preview/preview1.png)
 
-# How to install
+![preview2](https://github.com/Qiyue0726/awesome-osc/blob/main/preview/preview2.png)
 
-Locate your MPV folder. It is typically located at `\%APPDATA%\mpv\` on Windows and `~/.config/mpv/` on Linux/MacOS. See the [Files section](https://mpv.io/manual/master/#files) in mpv's manual for more info.
+![preview3](https://github.com/Qiyue0726/awesome-osc/blob/main/preview/preview3.png)
 
-Put mordenx.lua into your mpv "\~\~/scripts/" folder. Create the "\~\~/scripts/" folder if you don't already have one and remove any other OSC scripts,
-then put `Material-Design-Iconic-Font.ttf` in the "\~\~/fonts" folder.
+> 以上截图的相关配置均已存在于 osc.conf，如果不满意也可以按照自己的喜好摆放，具体的配置项请往下看
 
-in mpv.conf:
+# 安装使用
+1. 打开你的 mpv 文件夹，Windows 上通常位于 `\%APPDATA%\mpv\`，Linux 和 Mac 位于 `~/.config/mpv/`。如果找不到，可以看看官方文档[Files section](https://mpv.io/manual/master/#files)
+Windows 还可以在 mpv 目录中 创建 `portable_config` 文件夹，然后在其中创建 `scripts` 、`scripts` 和 `fonts` 及 `mpv.conf` 等
 
+2. 将字体文件 `Font Awesome 6 Free-Solid-900` 放到 fonts 文件夹中
+
+3. 将脚本 `awesome-osc.lua` 放到 scripts 文件夹中
+
+4. 将脚本配置文件 `osc.conf` 放到 `script-opts` 文件夹中
+
+5. 在 `mpv.conf` 添加以下配置以禁用自带 osc 和开启无边框
 ```
-osc = no
-border = no # Optional, but recommended
+# 无边框
+no-border
+
+# 关闭简易控制面板On Screen Controller(osc)
+no-osc
 ```
-`Material-Design-Iconic-Font.ttf` can also be downloaded from [here](https://zavoloklom.github.io/material-design-iconic-font/).
 
-# How to config
+> 完成以上步骤后，即可打开视频文件看到相应效果
 
-edit osc.conf in "\~\~/script-opts/" folder, however many options are changed, so refer to the user_opts variable in the script file for details.
+# 按钮
+相较于 mpv-osc-modern 和 ModernX，目前仅增加两个按钮
 
-# Thumbnails
+## backwardAndPrev
+* 鼠标左键：快退，可在 osc.conf 中通过 jumpamount 配置快进快退秒数
+* 鼠标右键：上一个文件
+* shift + 鼠标左键：上一个章节
 
-To enable thumbnails in timeline, install [thumbfast](https://github.com/po5/thumbfast). No other step necessary.
+## forwardAndNext
+* 鼠标左键：快进，可在 osc.conf 中通过 jumpamount 配置快进快退秒数
+* 鼠标右键：下一个文件
+* shift + 鼠标左键：下一个章节
 
-# Buttons
-
-like the built-in script, some buttons may accept multiple mouse actions, here is a list:
-
-## Seekbar
-* Left mouse button: seek to chosen position.
-* Right mouse button: seek to the head of chosen chapter
-## Playlist back/forward buttons
-* Left mouse button: play previous/next file.
-* Right mouse button: show playlist.
-## Skip back/forward buttons
-* Left mouse button: go to previous/next chapter.
-* Right mouse button: show chapter list.
-## Jump back/forward buttons
-* Left mouse button: Jumps forwards/backwards by 5 seconds, or by the amount set in `user_opts`.
-* Right mouse button: Jumps forwards/backwards by 1 minute.
-* Shift + Left mouse button: Skips to the previous/next frame.
-## Cycle audio/subtitle buttons
-* Left mouse button/Right mouse button: cycle to next/previous track.
-* Middle mouse button: show track list.
-## Playback time
-* Left mouse button: display time in milliseconds
-## Duration
-* Left mouse button: display total time instead of remaining time
+# 自定义配置
+mpv-osc-modern 和 ModernX 的配置大部分均可继续使用，目前已知只有配置项 `showjump` 被弃用，但仍可通过配置按钮显示响应的按钮。
+主要添加以下配置项：
+```
+leftBtnArea={'audio','sub'}     # 其值可为：info,fullscreen,audio,sub,play,prev,next,backward,forward,backwardAndPrev,forwardAndNext,jumpback,jumpfrwd,volume,volumeSlider，若该项未配置 play，则该按钮会出现在底部正中间
+rightBtnArea={'fullscreen'}     # 其值可为：info,fullscreen,audio,sub,volume,volumeSlider
+centerBtnAreaL={'backwardAndPrev'}  # 其值可为：prev,backward,jumpback,backwardAndPrev
+centerBtnAreaR={'forwardAndNext'}   # 其值可为：next,forward,jumpfrwd,forwardAndNext
+```
