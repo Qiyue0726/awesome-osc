@@ -52,7 +52,7 @@ mpv-osc-modern 和 ModernX 的配置大部分均可继续使用，目前已知�
 主要添加以下配置项：
 ```
 leftBtnArea={'audio','sub'}     # 其值可为：info,fullscreen,audio,sub,play,prev,next,backward,forward,backwardAndPrev,forwardAndNext,jumpback,jumpfrwd,volume,volumeSlider，若该项未配置 play，则该按钮会出现在底部正中间
-rightBtnArea={'fullscreen'}     # 其值可为：info,fullscreen,audio,sub,volume,volumeSlider
-centerBtnAreaL={'backwardAndPrev'}  # 其值可为：prev,backward,jumpback,backwardAndPrev
-centerBtnAreaR={'forwardAndNext'}   # 其值可为：next,forward,jumpfrwd,forwardAndNext
+rightBtnArea={'fullscreen'}     # 其值可为：info,fullscreen,audio,sub,volume,volumeSlider，该项配置需倒序添加
+centerBtnAreaL={'prev'}         # 其值可为：prev,backward,jumpback,backwardAndPrev
+centerBtnAreaR={'next'}         # 其值可为：next,forward,jumpfrwd,forwardAndNext
 ```
