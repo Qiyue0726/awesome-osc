@@ -43,9 +43,9 @@ local user_opts = {
     jumpamount = 5,             -- change the jump amount (in seconds by default)
     jumpmode = 'exact',         -- seek mode for jump buttons. e.g.
                                 -- 'exact', 'relative+keyframes', etc.
-    title = '${media-title}',   -- string compatible with property-expansion
+    title = '${filename}',      -- string compatible with property-expansion
                                 -- to be shown as OSC title
-    showtitle = true,		    -- show title in OSC
+    showtitle = false,		    -- show title in OSC
     showonpause = true,         -- whether to disable the hide timeout on pause
     timetotal = true,          	-- display total time instead of remaining time?
     timems = false,             -- Display time down to millliseconds by default
@@ -60,6 +60,8 @@ local user_opts = {
     rightBtnArea = {'fullscreen'},  -- buttom control button - right
     centerBtnAreaL = {'jumpback','backward','prev'}, -- play/pause can be in leftBtnArea
     centerBtnAreaR = {'jumpfrwd','forward','next'},
+    playOnTop = true,
+    showFileName = true
 }
 
 local icons = {
@@ -78,6 +80,8 @@ local icons = {
     info = '',
     backwardAndPrev = '',
     forwardAndNext = '',
+    -- backwardAndPrev = '',
+    -- forwardAndNext = '',
     jumpback = '',
     jumpfrwd = ''
 }
@@ -157,6 +161,7 @@ local osc_styles = {
     WinCtrl = '{\\blur1\\bord0.5\\1c&HFFFFFF&\\3c&H0\\fs40\\fnmpv-osd-symbols}',
     elementDown = '{\\1c&H999999&}',
     elementHighlight = '{\\blur1\\bord1\\1c&HFFC033&}',
+    fileName = '{\\blur1\\bord0.5\\1c&HFFFFFF&\\3c&H0\\fs25\\q2\\fn' .. user_opts.font .. '}',
 }
 
 -- internal states, do not touch
@@ -1154,7 +1159,7 @@ end
 function window_controls()
     local wc_geo = {
         x = 0,
-        y = 32,
+        y = 40,
         an = 1,
         w = osc_param.playresx,
         h = 32,
@@ -1202,7 +1207,13 @@ function window_controls()
     ne = new_element('minimize', 'button')
     ne.content = '\\n\238\132\146'
     ne.eventresponder['mbtn_left_up'] =
-        function () mp.commandv('cycle', 'window-minimized') end
+        function () 
+            mp.commandv('cycle', 'window-minimized') 
+            if mp.get_property('pause') == 'no' then
+                mp.commandv('cycle', 'pause')
+            end
+            
+        end
     lo = add_layout('minimize')
     lo.geometry = first_geo
     lo.style = osc_styles.WinCtrl
@@ -1226,6 +1237,24 @@ function window_controls()
     lo = add_layout('maximize')
     lo.geometry = second_geo
     lo.style = osc_styles.WinCtrl
+    lo.alpha[3] = 0
+
+    -- title
+    ne = new_element('fileName', 'button')
+    ne.content = function ()
+        local title = state.forced_title or
+                      mp.command_native({"expand-text", user_opts.title})
+        if state.paused then
+			title = title:gsub('\\n', ' '):gsub('\\$', ''):gsub('{','\\{')
+		else
+			title = title:gsub('\\n', ' '):gsub('\\$', ''):gsub('{','\\{') --title = ' '
+		end
+        return not (title == '') and title or ' '
+    end
+    ne.visible = osc_param.playresy >= 320 and user_opts.showFileName
+    lo = add_layout('fileName')
+    lo.geometry = {x = 20, y = button_y - 10, an = 7, w = titlebox_right - 20, h = wc_geo.h}
+    lo.style = osc_styles.fileName
     lo.alpha[3] = 0
 end
 
@@ -1423,17 +1452,21 @@ layouts = function ()
             lo.visible = (osc_param.playresx >= 600)
             leftOffset = leftOffset + 50
         elseif value == 'audio' then
-            lo = add_layout('cy_audio')
-            lo.geometry = {x = leftOffset, y = refY - 40, an = 5, w = 24, h = 24}
-            lo.style = osc_styles.Ctrl3
-            lo.visible = (osc_param.playresx >= 540)
-            leftOffset = leftOffset + 50
+            if #tracks_osc.audio > 1 then
+                lo = add_layout('cy_audio')
+                lo.geometry = {x = leftOffset, y = refY - 40, an = 5, w = 24, h = 24}
+                lo.style = osc_styles.Ctrl3
+                lo.visible = (osc_param.playresx >= 540)
+                leftOffset = leftOffset + 50
+            end
         elseif value == 'sub' then
-            lo = add_layout('cy_sub')
-            lo.geometry = {x = leftOffset, y = refY - 40, an = 5, w = 24, h = 24}
-            lo.style = osc_styles.Ctrl3
-            lo.visible = (osc_param.playresx >= 600)
-            leftOffset = leftOffset + 50
+            if #tracks_osc.sub > 1 then
+                lo = add_layout('cy_sub')
+                lo.geometry = {x = leftOffset, y = refY - 40, an = 5, w = 24, h = 24}
+                lo.style = osc_styles.Ctrl3
+                lo.visible = (osc_param.playresx >= 600)
+                leftOffset = leftOffset + 50
+            end
         elseif value == 'fullscreen' then
             lo = add_layout('tog_fs')
             lo.geometry = {x = leftOffset, y = refY - 40, an = 5, w = 24, h = 24}
@@ -1472,17 +1505,21 @@ layouts = function ()
             lo.visible = (osc_param.playresx >= 600)
             rightOffset = rightOffset + 50
         elseif value == 'audio' then
-            lo = add_layout('cy_audio')
-            lo.geometry = {x = osc_geo.w - rightOffset, y = refY - 40, an = 5, w = 24, h = 24}
-            lo.style = osc_styles.Ctrl3
-            lo.visible = (osc_param.playresx >= 540)
-            rightOffset = rightOffset + 50
+            if #tracks_osc.audio > 1 then
+                lo = add_layout('cy_audio')
+                lo.geometry = {x = osc_geo.w - rightOffset, y = refY - 40, an = 5, w = 24, h = 24}
+                lo.style = osc_styles.Ctrl3
+                lo.visible = (osc_param.playresx >= 540)
+                rightOffset = rightOffset + 50
+            end
         elseif value == 'sub' then
-            lo = add_layout('cy_sub')
-            lo.geometry = {x = osc_geo.w - rightOffset, y = refY - 40, an = 5, w = 24, h = 24}
-            lo.style = osc_styles.Ctrl3
-            lo.visible = (osc_param.playresx >= 600)
-            rightOffset = rightOffset + 50
+            if #tracks_osc.sub > 1 then
+                lo = add_layout('cy_sub')
+                lo.geometry = {x = osc_geo.w - rightOffset, y = refY - 40, an = 5, w = 24, h = 24}
+                lo.style = osc_styles.Ctrl3
+                lo.visible = (osc_param.playresx >= 600)
+                rightOffset = rightOffset + 50
+            end
         elseif value == 'fullscreen' then
             lo = add_layout('tog_fs')
             lo.geometry = {x = osc_geo.w - rightOffset, y = refY - 40, an = 5, w = 24, h = 24}
@@ -1598,7 +1635,19 @@ function osc_init()
         end
     end
     ne.eventresponder['mbtn_left_up'] =
-        function () mp.commandv('cycle', 'pause') end
+        function () 
+            mp.commandv('cycle', 'pause')
+            if mp.get_property('pause') == 'yes' then
+                if user_opts.playOnTop and mp.get_property('ontop') == 'yes' then
+                    mp.set_property_native('ontop',false)
+                end
+            else
+                if user_opts.playOnTop and mp.get_property('ontop') == 'no' then
+                    mp.set_property_native('ontop',true)
+                end
+            end
+            msg.info(mp.get_property('ontop'))
+        end
     --ne.eventresponder['mbtn_right_up'] =
     --    function () mp.commandv('script-binding', 'open-file-dialog') end
 
@@ -1920,6 +1969,16 @@ function shutdown()
 end
 
 function new_element_ctrlBtn(ne,table)
+    -- some often needed stuff
+    local pl_count = mp.get_property_number('playlist-count', 0)
+    local have_pl = (pl_count > 1)
+    local pl_pos = mp.get_property_number('playlist-pos', 0) + 1
+    local have_ch = (mp.get_property_number('chapters', 0) > 0)
+    local loop = mp.get_property('loop-playlist', 'no')
+
+    local jumpamount = user_opts.jumpamount
+    local jumpmode = user_opts.jumpmode
+
     for key,value in pairs(type(table)=='table' and table or stringToTable(table)) do
         if value == 'prev' then
             -- prev

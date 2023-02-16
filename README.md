@@ -55,4 +55,6 @@ leftBtnArea={'audio','sub'}     # 其值可为：info,fullscreen,audio,sub,play,
 rightBtnArea={'fullscreen'}     # 其值可为：info,fullscreen,audio,sub,volume,volumeSlider，该项配置需倒序添加
 centerBtnAreaL={'prev'}         # 其值可为：prev,backward,jumpback,backwardAndPrev
 centerBtnAreaR={'next'}         # 其值可为：next,forward,jumpfrwd,forwardAndNext
+playOnTop=yes|no                # 播放时置顶，可配合 SPACE 	cycle pause; cycle ontop 		#空格 切换暂停 等快捷键使用
+showFileName=yes|no             # 显示文件名在顶部，若想显示在进度条之上，可使用 showtitle
 ```
