@@ -26,7 +26,7 @@ local user_opts = {
     scalefullscreen = 1.0,      -- scaling of the controller when fullscreen
     scaleforcedwindow = 2.0,    -- scaling when rendered on a forced window
     vidscale = true,            -- scale the controller with the video?
-    hidetimeout = 3000,         -- duration in ms until the OSC hides if no
+    hidetimeout = 1000,         -- duration in ms until the OSC hides if no
                                 -- mouse movement. enforced non-negative for the
                                 -- user, but internally negative is 'always-on'.
     fadeduration = 250,         -- duration of fade out in ms, 0 = no fade
@@ -36,9 +36,9 @@ local user_opts = {
                                 -- internal track list management (and some
                                 -- functions that depend on it)
     font = 'mpv-osd-symbols',	-- default osc font
-    seekbarhandlesize = 1.0,	-- size ratio of the slider handle, range 0 ~ 1
+    seekbarhandlesize = 0.5,	-- size ratio of the slider handle, range 0 ~ 1
     seekrange = true,		    -- show seekrange overlay
-    seekrangealpha = 64,      	-- transparency of seekranges
+    seekrangealpha = 100,      	-- transparency of seekranges
     seekbarkeyframes = true,    -- use keyframes when dragging the seekbar
     jumpamount = 5,             -- change the jump amount (in seconds by default)
     jumpmode = 'exact',         -- seek mode for jump buttons. e.g.
@@ -146,17 +146,18 @@ local osc_param = { -- calculated by osc_init()
     areas = {},
 }
 
+-- 颜色代码倒序，参考 ASS 字幕格式
 local osc_styles = {
-    TransBg = '{\\blur100\\bord100\\1c&H000000&\\3c&H000000&}',
+    TransBg = '{\\blur100\\bord100\\1c&H000000&\\3c&H000000&}', -- 底部控制栏
     SeekbarBg = '{\\blur0\\bord0\\1c&HFFFFFF&}',
-    SeekbarFg = '{\\blur1\\bord1\\1c&HE39C42&}',
+    SeekbarFg = '{\\blur1\\bord1\\1c&H6633ff&}',
     VolumebarBg = '{\\blur0\\bord0\\1c&H999999&}',
     VolumebarFg = '{\\blur1\\bord1\\1c&HFFFFFF&}',
     Ctrl1 = '{\\blur0\\bord0\\1c&HFFFFFF&\\3c&HFFFFFF&\\fs36\\fnFont Awesome 6 Free Solid}',
     Ctrl2 = '{\\blur0\\bord0\\1c&HFFFFFF&\\3c&HFFFFFF&\\fs24\\fnFont Awesome 6 Free Solid}',
     Ctrl3 = '{\\blur0\\bord0\\1c&HFFFFFF&\\3c&HFFFFFF&\\fs24\\fnFont Awesome 6 Free Solid}',
     Time = '{\\blur0\\bord0\\1c&HFFFFFF&\\3c&H000000&\\fs20\\fn' .. user_opts.font .. '}',
-    Tooltip = '{\\blur1\\bord0.5\\1c&HFFFFFF&\\3c&H000000&\\fs18\\fn' .. user_opts.font .. '}',
+    Tooltip = '{\\blur1\\bord0.5\\1c&HFFFFFF&\\3c&H000000&\\fs18\\fn' .. user_opts.font .. '}', -- 进度条时间
     Title = '{\\blur1\\bord0.5\\1c&HFFFFFF&\\3c&H0\\fs30\\q2\\fn' .. user_opts.font .. '}',
     WinCtrl = '{\\blur1\\bord0.5\\1c&HFFFFFF&\\3c&H0\\fs40\\fnmpv-osd-symbols}',
     elementDown = '{\\1c&H999999&}',
@@ -805,6 +806,7 @@ function render_elements(master_ass)
 				elem_ass:rect_cw(0, slider_lo.gap, xp, elem_geo.h - slider_lo.gap)
             end
 
+            -- 缓存范围
             if seekRanges then
 				elem_ass:draw_stop()
 				elem_ass:merge(element.style_ass)
@@ -1312,14 +1314,14 @@ layouts = function ()
     --
     new_element('seekbarbg', 'box')
     lo = add_layout('seekbarbg')
-    lo.geometry = {x = refX , y = refY - 96 , an = 5, w = osc_geo.w - 50, h = 2}
+    lo.geometry = {x = refX , y = refY - 80 , an = 5, w = osc_geo.w - 220, h = 2}
     lo.layer = 13
     lo.style = osc_styles.SeekbarBg
     lo.alpha[1] = 128
     lo.alpha[3] = 128
 
     lo = add_layout('seekbar')
-    lo.geometry = {x = refX, y = refY - 96 , an = 5, w = osc_geo.w - 50, h = 16}
+    lo.geometry = {x = refX, y = refY - 80 , an = 5, w = osc_geo.w - 220, h = 16}
 	lo.style = osc_styles.SeekbarFg
     lo.slider.gap = 7
     lo.slider.tooltip_style = osc_styles.Tooltip
@@ -1388,12 +1390,12 @@ layouts = function ()
 
 	-- Time
     lo = add_layout('tc_left')
-    lo.geometry = {x = 25, y = refY - 84, an = 7, w = 64, h = 20}
+    lo.geometry = {x = 25, y = refY - 89, an = 7, w = 64, h = 20}
     lo.style = osc_styles.Time	
 	
 
     lo = add_layout('tc_right')
-    lo.geometry = {x = osc_geo.w - 25 , y = refY -84, an = 9, w = 64, h = 20}
+    lo.geometry = {x = osc_geo.w - 25 , y = refY -89, an = 9, w = 64, h = 20}
     lo.style = osc_styles.Time	
 
     local leftOffset = 40
